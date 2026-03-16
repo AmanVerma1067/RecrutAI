@@ -29,13 +29,27 @@ export async function POST(request: Request): Promise<NextResponse> {
       const arrayBuffer = await file.arrayBuffer();
       
       try {
-        // pdf-parse v2 API
-        const { PDFParse } = await import("pdf-parse");
-        const parser = new PDFParse({ data: new Uint8Array(arrayBuffer) });
-        const result = await parser.getText();
-        rawText = result.text;
+        // Use pdf2json, which is pure JS and works safely on Vercel
+        const PDFParser = (await import("pdf2json")).default;
+        
+        rawText = await new Promise<string>((resolve, reject) => {
+          const pdfParser = new PDFParser(undefined, true); // true = text parsing mode
+          
+          pdfParser.on("pdfParser_dataError", (errData: any) => {
+            reject(errData?.parserError || new Error("PDF parsing failed"));
+          });
+          
+          pdfParser.on("pdfParser_dataReady", () => {
+             // pdf2json provides extracted text directly
+             resolve(pdfParser.getRawTextContent());
+          });
+          
+          // pdf2json requires a Buffer
+          pdfParser.parseBuffer(Buffer.from(arrayBuffer));
+        });
+
       } catch (pdfError) {
-        console.warn("pdf-parse failed, attempting raw text extraction:", pdfError);
+        console.warn("pdf2json failed, attempting basic raw text fallback:", pdfError);
         // Fallback: try to extract readable text from PDF binary
         const decoder = new TextDecoder("utf-8", { fatal: false });
         const rawContent = decoder.decode(arrayBuffer);
