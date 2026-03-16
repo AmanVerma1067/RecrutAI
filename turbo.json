@@ -1,5 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "GEMINI_API_KEY",
+    "GEMINI_MODEL",
+    "GEMINI_INTERVIEW_MODEL",
+    "GEMINI_REPORT_MODEL",
+    "AI_PROVIDER",
+    "OPENAI_API_KEY",
+    "OPENAI_MODEL",
+    "NEXT_PUBLIC_APP_URL",
+    "VOICE_PROVIDER",
+    "OPENAI_WHISPER_MODEL",
+    "OPENAI_TTS_MODEL",
+    "ELEVENLABS_API_KEY"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
