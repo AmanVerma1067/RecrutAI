@@ -506,7 +506,3 @@ pm2 start .next/standalone/server.js --name recruitai
 This project is licensed under the **MIT License**.
 
 ---
-
-<p align="center">
-  Built with ❤️ by <a href="https://github.com/AmanVerma1067">Aman Verma</a>
-</p>
