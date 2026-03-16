@@ -47,7 +47,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       difficulty: difficulty as DifficultyLevel,
       language: challengeData.language || "typescript",
       starterCode: challengeData.starterCode || "export function solve(input: any): any {\n  return null;\n}",
-      testCases: (challengeData.testCases || []).map((tc: any) => ({
+      testCases: (challengeData.testCases || []).map((tc: Record<string, unknown>) => ({
         input: tc.input || "",
         expectedOutput: tc.expectedOutput || "",
         explanation: tc.explanation
