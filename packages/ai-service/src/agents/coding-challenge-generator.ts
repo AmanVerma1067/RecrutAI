@@ -3,7 +3,7 @@ import type { ParsedResume } from "@recruitai/shared";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const getGeminiModel = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) return null;
   const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -365,14 +365,14 @@ export async function generateDynamiChallengeWithGemini(
     if (parsed && parsed.prompt && parsed.starterCode) {
       return {
         ...parsed,
-        id: \`challenge-gemini-\${Date.now()}\`,
+        id: `challenge-gemini-${Date.now()}`,
         resumeSkillMatch: skill,
         suitabilityScore: 0.95,
-        reasoningBrief: \`Dynamically generated \${difficulty} challenge for \${skill}\`
+        reasoningBrief: `Dynamically generated ${difficulty} challenge for ${skill}`
       };
     }
   } catch (error) {
-    console.warn(\`Failed to generate dynamic challenge for \${skill} with Gemini, falling back to static.\`, error);
+    console.warn(`Failed to generate dynamic challenge for ${skill} with Gemini, falling back to static.`, error);
   }
   return null;
 }
@@ -444,5 +444,4 @@ Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
 }
 
 Generate a fresh, original problem fitting the ${difficulty} level and ${topic} topic.`;
-}
 }
