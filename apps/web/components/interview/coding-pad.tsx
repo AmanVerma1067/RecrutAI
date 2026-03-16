@@ -6,7 +6,11 @@ import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 
 const defaultChallenge: CodingChallenge = {
+  id: "default-coding-pad",
   prompt: "Implement a function that returns top-k candidates by weighted score.",
+  description: "Given an array of scores and a number k, return the top k scores in descending order.",
+  category: "arrays",
+  difficulty: "medium",
   language: "typescript",
   starterCode: `export function topKCandidates(scores: number[], k: number): number[] {\n  return [];\n}`,
   testCases: [
@@ -14,6 +18,7 @@ const defaultChallenge: CodingChallenge = {
     { input: "[60,72,65,81],3", expectedOutput: "[81,72,65]" }
   ],
   timeLimit: 900,
+  subtopic: "Sorting & Selection",
   aiObservation: true
 };
 
