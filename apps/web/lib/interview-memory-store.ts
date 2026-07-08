@@ -310,3 +310,100 @@ export const listDashboardReportItems = (userId: string): DashboardReportItem[] 
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 };
+
+export const seedCompletedInterviewSession = (userId: string): string => {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const createdAt = new Date(now.getTime() - 3600 * 1000).toISOString();
+  const endedAt = now.toISOString();
+  
+  const mockReport = {
+    candidateName: "Seeded Guest Candidate",
+    role: "Senior AI Product Architect",
+    date: endedAt,
+    overallScore: 89,
+    verdict: "Strong Hire" as const,
+    categoryScores: [
+      { category: "Technical Depth", score: 92, weight: 0.35, feedback: "Deep domain understanding of transformers, RAG architecture, and agentic workflows." },
+      { category: "System Design", score: 88, weight: 0.25, feedback: "Excellent distributed design, handled scaling trade-offs and consistency well." },
+      { category: "Problem Solving", score: 85, weight: 0.2, feedback: "Methodical debugging approach, targeted Root Cause Analysis." },
+      { category: "Communication", score: 90, weight: 0.2, feedback: "Structured communication using STAR framework. Clear articulating style." }
+    ],
+    sentimentAnalysis: {
+      overallConfidence: 87,
+      emotionalArc: [
+        { question: 1, sentiment: "positive" as const, confidence: 90 },
+        { question: 2, sentiment: "neutral" as const, confidence: 85 }
+      ],
+      flags: ["No anomalies detected in response alignment"]
+    },
+    areasOfStrength: ["Technical Depth", "Communication"],
+    areasForImprovement: ["Problem Solving"],
+    recommendedResources: [
+      {
+        topic: "Advanced Distributed Systems",
+        resource: "Saga patterns and Event Sourcing",
+        url: "https://microservices.io/patterns/data/saga.html"
+      }
+    ],
+    transcript: [
+      { speaker: "AI" as const, text: "How would you design a rate limiter for an enterprise API cluster?", timestamp: new Date().toISOString() },
+      { speaker: "Candidate" as const, text: "I'd use a Redis-backed token bucket algorithm. For a distributed cluster, I would leverage Redis Cluster with Lua scripting to ensure atomic increments and prevent race conditions. We'd track requests per client IP or API key, with a local cache fallback in case of Redis latency spikes.", timestamp: new Date().toISOString() },
+      { speaker: "AI" as const, text: "How do you handle consistency issues between the cache and PostgreSQL db?", timestamp: new Date().toISOString() },
+      { speaker: "Candidate" as const, text: "We utilize a Cache-Aside strategy. Writes update PostgreSQL first, then invalidate the cache key. For high-concurrency systems, to avoid race conditions like cache stampede, we use mutual exclusion locks via Redlock.", timestamp: new Date().toISOString() }
+    ],
+    proctoringLog: [
+      { type: "TAB_SWITCH" as const, timestamp: new Date().toISOString(), severity: "medium" as const, details: "Candidate switched tab to check documentation" }
+    ],
+    generatedAt: endedAt
+  };
+
+  const session: InterviewSession = {
+    id,
+    userId,
+    candidateName: "Seeded Guest Candidate",
+    role: "Senior AI Product Architect",
+    resume: {
+      candidate: { name: "Seeded Guest Candidate", email: "guest@example.com", phone: "123-456-7890", linkedIn: "", github: "", portfolio: "" },
+      summary: "AI Architect with experience building LLM applications and microservices.",
+      seniorityLevel: "senior",
+      skills: { primary: ["TypeScript", "Redis", "PostgreSQL", "Kafka"], secondary: ["Docker", "AWS"], soft: ["Leadership", "Communication"] },
+      experience: [],
+      education: [],
+      projects: [],
+      certifications: [],
+      confidence: 0.95
+    },
+    shadowJd: {
+      title: "Senior AI Product Architect",
+      company: "RecruitAI Corp",
+      department: "Engineering",
+      responsibilities: ["Design scalable microservices", "Lead AI product integrations"],
+      requiredSkills: ["TypeScript", "Redis", "PostgreSQL"],
+      niceToHaveSkills: ["Kafka", "Docker"],
+      evaluationRubric: [
+        { category: "Technical Depth", weight: 0.35, criteria: ["Understanding of Node.js / TypeScript internals", "Experience with performance profiling"] },
+        { category: "System Design", weight: 0.25, criteria: ["Distributed systems patterns", "Database transaction handling"] },
+        { category: "Problem Solving", weight: 0.2, criteria: ["Algorithmic efficiency", "Debugging production issues"] },
+        { category: "Communication", weight: 0.2, criteria: ["Clear articulation of technical concepts", "Structured presentation"] }
+      ],
+      interviewFocus: ["Backend architecture", "Database scalability"],
+      difficultyLevel: "expert"
+    },
+    questions: [
+      { id: "q1", type: "technical", prompt: "How would you design a rate limiter for an enterprise API cluster?", expectedSignals: ["Redis", "token bucket", "Lua scripting"], difficulty: 3, timeLimitSeconds: 180 },
+      { id: "q2", type: "system_design", prompt: "How do you handle consistency issues between the cache and PostgreSQL db?", expectedSignals: ["Cache-Aside", "PostgreSQL", "Redlock"], difficulty: 4, timeLimitSeconds: 240 }
+    ],
+    status: "completed",
+    createdAt,
+    startedAt: createdAt,
+    endedAt,
+    transcript: mockReport.transcript,
+    proctoringLog: mockReport.proctoringLog,
+    reportReadyAt: endedAt,
+    report: mockReport
+  };
+
+  getStore().set(id, session);
+  return id;
+};
