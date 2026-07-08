@@ -4,3 +4,5 @@ export * from "./agents/interviewer";
 export * from "./agents/report-generator";
 export * from "./agents/coding-challenge-generator";
 export * from "./prompts/templates";
+export * from "./utils/gemini-wrapper";
+
