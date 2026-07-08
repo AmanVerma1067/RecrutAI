@@ -1,6 +1,7 @@
 import type { CodingChallenge, DifficultyLevel, ResumeSkilledChallenge } from "@recruitai/shared";
 import type { ParsedResume } from "@recruitai/shared";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { runWithRetryAndTimeout } from "../utils/gemini-wrapper";
 
 const getGeminiModel = () => {
   const apiKey = process.env["GEMINI_API_KEY"];
@@ -353,15 +354,20 @@ export async function generateDynamiChallengeWithGemini(
   const model = getGeminiModel();
   if (!model) return null;
 
+  const prompt = buildCodingChallengePrompt(skill, difficulty);
+
   try {
-    const prompt = buildCodingChallengePrompt(skill, difficulty);
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    
-    // Clean potential markdown wrapping
-    const rawJson = responseText.replace(/^```json\n/, "").replace(/^```\n/, "").replace(/\n```$/, "").trim();
-    const parsed = JSON.parse(rawJson) as CodingChallenge;
-    
+    const parsed = await runWithRetryAndTimeout<CodingChallenge | null>(
+      "generateDynamiChallengeWithGemini",
+      async () => {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      },
+      () => null,
+      6000,
+      2
+    );
+
     if (parsed && parsed.prompt && parsed.starterCode) {
       return {
         ...parsed,

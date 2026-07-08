@@ -8,6 +8,7 @@ import type {
 } from "@recruitai/shared";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { runWithRetryAndTimeout } from "../utils/gemini-wrapper";
 
 /* ──────────────────────────────────────────────────────────────────
    Question builder — generates resume-specific questions that
@@ -32,8 +33,7 @@ async function buildDynamicScriptWithGemini(
   const model = getGeminiModel();
   if (!model) return null;
 
-  try {
-    const prompt = `You are an expert technical interviewer. Generate a personalized 10-question technical interview script for a candidate applying for the role of "${jd.title}".
+  const prompt = `You are an expert technical interviewer. Generate a personalized 10-question technical interview script for a candidate applying for the role of "${jd.title}".
 
 Candidate Resume Summary:
 ${resume.summary || "N/A"}
@@ -66,13 +66,20 @@ Question Progression:
 
 Make the questions highly specific to their listed projects, skills, and experience rather than generic questions when possible. Ensure valid JSON output only with no markdown wrapping or extra text.`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    // Clean potential markdown wrapping
-    const rawJson = responseText.replace(/^```json\n/, "").replace(/^```\n/, "").replace(/\n```$/, "").trim();
-    const parsed = JSON.parse(rawJson) as InterviewQuestion[];
+  try {
+    const parsed = await runWithRetryAndTimeout<InterviewQuestion[] | null>(
+      "buildDynamicScriptWithGemini",
+      async () => {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      },
+      () => null,
+      6000,
+      2
+    );
+
     if (Array.isArray(parsed) && parsed.length >= 5) {
-       return parsed;
+      return parsed;
     }
   } catch (error) {
     console.warn("Failed to generate dynamic questions with Gemini, falling back to static generation.", error);

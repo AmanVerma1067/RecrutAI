@@ -1,5 +1,6 @@
 import type { ParsedResume, SeniorityLevel } from "@recruitai/shared";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { runWithRetryAndTimeout } from "../utils/gemini-wrapper";
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 
@@ -312,9 +313,8 @@ async function parseResumeWithGemini(rawText: string): Promise<ParsedResume | nu
   const model = getGeminiModel();
   if (!model) return null;
 
-  try {
-    const prompt = `You are an expert technical recruiter analyzing a resume. Extract the candidate's core information into a highly structured JSON format.
-    
+  const prompt = `You are an expert technical recruiter analyzing a resume. Extract the candidate's core information into a highly structured JSON format.
+  
 Here is the raw text extracted from their resume PDF:
 ---
 ${rawText.substring(0, 10000)}
@@ -338,13 +338,18 @@ Rules:
 - evidence.techUsed and projects.techStack should contain specific technologies used.
 - seniorityLevel should be strictly inferred based on years of experience and titles.`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    
-    // Clean potential markdown wrapping
-    const rawJson = responseText.replace(/^```json\n/, "").replace(/^```\n/, "").replace(/\n```$/, "").trim();
-    const parsed = JSON.parse(rawJson) as ParsedResume;
-    
+  try {
+    const parsed = await runWithRetryAndTimeout<ParsedResume | null>(
+      "parseResumeWithGemini",
+      async () => {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      },
+      () => null,
+      6000,
+      2
+    );
+
     if (parsed && parsed.candidate && parsed.skills) {
       return parsed;
     }
