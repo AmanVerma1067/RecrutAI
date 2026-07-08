@@ -215,6 +215,25 @@ export default function QuickInterviewPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [startTime, setStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [loadingSubText, setLoadingSubText] = useState("AI reasoning engine evaluating response parameters...");
+
+  // Rotate loading subtext messages
+  useEffect(() => {
+    if (phase !== "loading" && phase !== "evaluating") return;
+    const steps = [
+      "AI reasoning engine evaluating response parameters...",
+      "Establishing secure context mapping structures...",
+      "Structuring dynamic question syllabus...",
+      "Analyzing competency matrices...",
+      "Configuring real-time evaluations..."
+    ];
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % steps.length;
+      setLoadingSubText(steps[idx]!);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, [phase]);
 
   // Timer
   useEffect(() => {
@@ -459,31 +478,31 @@ export default function QuickInterviewPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-32"
+            className="flex flex-col items-center justify-center py-20 w-full max-w-xl mx-auto"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-16 h-16 rounded-full border-2 border-indigo-500/20 border-t-indigo-500"
-            />
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-6 text-zinc-300 text-sm"
-            >
-              Gemini is crafting your questions on <span className="text-indigo-400 font-medium">{topic}</span>...
-            </motion.p>
-            <div className="flex gap-1 mt-4">
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="w-2 h-2 rounded-full bg-indigo-400"
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                />
-              ))}
+            {/* Shimmering Skeleton Q&A Card */}
+            <div className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-8 animate-pulse space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/10" />
+                  <div className="h-4 bg-white/10 rounded w-16" />
+                </div>
+                <div className="h-4 bg-white/10 rounded w-24" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-5 bg-white/10 rounded w-full" />
+                <div className="h-5 bg-white/10 rounded w-5/6" />
+              </div>
+              <div className="h-28 rounded-xl bg-white/[0.04] w-full" />
+              <div className="flex justify-between items-center pt-2">
+                <div className="h-4 bg-white/10 rounded w-12" />
+                <div className="h-10 bg-indigo-500/20 rounded-xl w-20" />
+              </div>
             </div>
+
+            <p className="mt-8 text-indigo-400 text-sm font-medium animate-pulse tracking-wide text-center">
+              {loadingSubText}
+            </p>
           </motion.div>
         )}
 
@@ -622,46 +641,29 @@ export default function QuickInterviewPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-32"
+            className="flex flex-col items-center justify-center py-10 w-full max-w-2xl mx-auto"
           >
-            {/* AI Brain animation */}
-            <motion.div
-              className="relative w-24 h-24 mb-6"
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/30 to-purple-500/30"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-4xl">🧠</span>
+            {/* Shimmering Results Dashboard Skeleton */}
+            <div className="w-full animate-pulse space-y-8">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-40 h-40 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-full bg-white/5" />
+                </div>
+                <div className="h-6 bg-white/10 rounded w-48" />
+                <div className="h-4 bg-white/10 rounded w-64" />
               </div>
-            </motion.div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="h-32 bg-white/[0.02] border border-white/[0.06] rounded-2xl" />
+                <div className="h-32 bg-white/[0.02] border border-white/[0.06] rounded-2xl" />
+              </div>
 
-            <h3 className="text-lg font-semibold text-zinc-100 mb-2">Gemini is evaluating your answers...</h3>
-            <p className="text-sm text-zinc-400">Analyzing correctness, completeness, and clarity</p>
-
-            {/* Animated progress dots */}
-            <div className="flex gap-2 mt-6">
-              {["Correctness", "Completeness", "Clarity"].map((label, i) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.5 }}
-                  className="flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5"
-                >
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-indigo-400"
-                    animate={{ scale: [1, 1.5, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.3 }}
-                  />
-                  <span className="text-xs text-zinc-400">{label}</span>
-                </motion.div>
-              ))}
+              <div className="h-24 bg-white/[0.02] border border-white/[0.06] rounded-2xl" />
             </div>
+
+            <p className="mt-10 text-indigo-400 text-sm font-medium animate-pulse tracking-wide text-center">
+              {loadingSubText}
+            </p>
           </motion.div>
         )}
 

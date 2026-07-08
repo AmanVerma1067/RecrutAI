@@ -16,6 +16,29 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleGuestBypass = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/demo-bypass", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to initialize guest session");
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Guest login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const submit = async () => {
     setError(null);
     setLoading(true);
@@ -100,9 +123,20 @@ export default function LoginPage() {
           </p>
         )}
 
-        <Button onClick={submit} disabled={loading || !email || !password || (mode === "register" && !name)} className="w-full">
-          {loading ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
-        </Button>
+        <div className="space-y-3">
+          <Button onClick={submit} disabled={loading || !email || !password || (mode === "register" && !name)} className="w-full">
+            {loading ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
+          </Button>
+
+          <div className="relative flex items-center justify-center my-4">
+            <span className="absolute w-full border-t border-white/[0.08]" />
+            <span className="relative bg-[#0d0d0f] px-3 text-[10px] uppercase tracking-wider text-zinc-500 font-medium">Or test the platform</span>
+          </div>
+
+          <Button onClick={handleGuestBypass} disabled={loading} variant="secondary" className="w-full border border-white/[0.08] hover:bg-white/[0.04]">
+            {loading ? "Initializing..." : "Demo / Guest Mode"}
+          </Button>
+        </div>
       </Card>
     </div>
   );
