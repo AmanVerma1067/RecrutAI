@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReportStatus } from "../../../../lib/interview-memory-store";
 import { getUserIdFromRequest } from "../../../../lib/auth";
+import { demoReport } from "../../../../lib/demo-report";
 
 interface ParamsContext {
   params: Promise<{ id: string }>;
@@ -13,6 +14,14 @@ export async function GET(request: NextRequest, context: ParamsContext): Promise
   }
 
   const { id } = await context.params;
+  if (id === "demo") {
+    return NextResponse.json({
+      status: "ready",
+      report: demoReport,
+      reportReadyAt: new Date().toISOString()
+    });
+  }
+
   const status = getReportStatus(id, userId);
 
   if (status.status === "missing") {
